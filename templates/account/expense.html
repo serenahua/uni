@@ -1,0 +1,53 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block content %}
+  <i class="fas fa-money-bill-alt page_icon"></i>
+  <div id="expense_management">
+      <div class="title">家庭支出</div>
+      <form action="{% url 'account:expense' %}" class="main">
+          {% csrf_token %}
+
+          {% if item is None %}
+          <input type="hidden" name="method" value="create">
+          {% else %}
+          <input type="hidden" name="method" value="edit">
+          <input type="hidden" name="id" value="{{ item.id }}">
+          {% endif %}
+
+          <div class="content">
+              <div class="item">
+                  <label for="date" class="des">日期:</label>
+                  <input type="date" name="date" id="date" class="required" value="{% if item %}{{ item.date|date:'Y-m-d' }}{% else %}{{ today|date:'Y-m-d' }}{% endif %}">
+              </div>
+              <div class="item">
+                  <label for="value" class="des">金額:</label>
+                  <input type="number" name="value" id="value" class="required" value="{{ item.value }}">
+              </div>
+              <div class="item">
+                  <label for="category" class="des">類別:</label>
+                  <select id="category" name="category">
+                      {% for category in categories %}
+                      <option value="{{ category.id }}" {% if item.item.id == category.id %}selected{% endif %}>{{ category.name }}</option>
+                      {% endfor %}
+                  </select>
+              </div>
+              <div class="item">
+                  <label for="remark" class="des">備註:</label>
+                  <input type="text" name="remark" id="remark" value="{{ item.remark }}">
+              </div>
+          </div>
+          <div class="btn_group">
+              <button class="cancel_btn" data-url="{% url 'account:index' %}">返回</button>
+              {% if item is None %}
+              <button class="continue_btn">送出並繼續</button>
+              {% endif %}
+              <button class="submit_btn">{% if item is None %}送出{% else %}修改{% endif %}</button>
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
+{% block js %}
+<script src="{% static 'js/form.js' %}"></script>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends 'common/base.html' %}
+{% load static %}
+
+{% block content %}
+  <i class="fas fa-cog page_icon"></i>
+  <div id="system_management">
+      <h1>系統資訊管理</h1>
+      <div class="content_core">
+          <div class="nav">
+              <a href="{% url 'account:system_management' %}?cat=1" class="{% if cat == '1' %}active{% endif %}">馥香雞支出項目</a>
+              <a href="{% url 'account:system_management' %}?cat=2" class="{% if cat == '2' %}active{% endif %}">日料小菜支出項目</a>
+              <a href="{% url 'account:system_management' %}?cat=3" class="{% if cat == '3' %}active{% endif %}">家庭支出項目</a>
+          </div>
+          <div class="content">
+              <div class="items">
+                  <table>
+                      <thead>
+                          <tr>
+                              <td>編號</td>
+                              <td>名稱</td>
+                              <td></td>
+                          </tr>
+                      </thead>
+                      <tbody>
+                          {% for expense in items %}
+                          <tr>
+                              <td>{{ forloop.counter }}</td>
+                              <td>{{ expense.name }}</td>
+                              <td>
+                                  <button class="btn_style edit">編輯</button>
+                                  <button class="btn_style delete">刪除</button>
+                              </td>
+                          </tr>
+                          {% endfor %}
+                      </tbody>
+                  </table>
+              </div>
+              <div class="bottom">
+                  <a href="{% url 'account:index' %}">返回</a>
+              </div>
+          </div>
+      </div>
+  </div>
+{% endblock %}
+
