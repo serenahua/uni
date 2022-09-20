@@ -10,3 +10,4 @@ django-mathfilters==1.0.0
 djangorestframework==3.12.4
 djangorestframework-jwt==1.11.0
 whitenoise>=4.0
+dj_static
