@@ -9,4 +9,4 @@ django-jsonfield-backport==1.0.5
 django-mathfilters==1.0.0
 djangorestframework==3.12.4
 djangorestframework-jwt==1.11.0
-django-cors-headers
+whitenoise>=4.0
