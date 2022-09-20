@@ -1,0 +1,383 @@
+@import './mixins/_allMixins.less';
+@import './_default-themes.less';
+
+body {
+    margin: 0;
+    padding: 0;
+    background: rgb(@mainGreen, .75);
+    font-family: 'Roboto', sans-serif;
+    color: @fontColor;
+    height: 100vh;
+    position: relative;
+
+    #wrapper {
+        .page_icon {
+            position: fixed;
+            right: 10px;
+            bottom: 10px;
+            font-size: 30vw;
+            color: rgba(@white, .2);
+        }
+
+        #nav {
+            .flexbox(row, flex-start, flex-end);
+            padding: 40px 18px 0 40px;
+
+            .nav_home {
+                .flexbox(row, center, center);
+                flex-wrap: wrap;
+                color: rgb(@white);
+                text-decoration: none;
+                outline: none;
+                margin-right: auto;
+                gap: 5px;
+
+                .icon {
+                    font-size: 49px;
+                }
+
+                span {
+                    font-size: 32px;
+                }
+            }
+
+            .nav_content {
+                .flexbox(row-reverse, flex-start, flex-end);
+                background: rgba(@white, .8);
+                border: 1px solid rgb(@mainGreen);
+                border-radius: 100px;
+                padding: 20px;
+                gap: 20px;
+                cursor: pointer;
+
+                .menu-icon {
+                    font-size: 29px;
+                    color: rgb(@mainGreen);
+                }
+
+                .list {
+                    display: none;
+                }
+
+                &:hover {
+                    background: rgb(@white);
+
+                    .list {
+                        .flexbox(row, flex-start, flex-start);
+                        gap: 20px;
+
+                        .icon {
+                            .menu-icon;
+
+                            &:hover {
+                                color: rgb(@mainYellow);
+                                .transform(scale(1.3));
+                            }
+                        }
+                    }
+                }
+            }
+
+        }
+
+        #home_management {
+            .flexbox(column, flex-start, flex-start);
+            width: 90vw;
+            height: 80vh;
+            margin: auto;
+            margin-top: 50px;
+            gap: 2vh;
+
+            .total {
+                .flexbox(column, flex-start, flex-start);
+                background: rgba(@white, .95);
+                border-radius: 30px;
+                box-sizing: border-box;
+                cursor: pointer;
+                padding: 30px;
+                width: 100%;
+                z-index: 2;
+
+                .des {
+                    font-size: 2vw;
+                    color: rgb(@mainGreen);
+                }
+
+                .value {
+                    font-size: 6vw;
+                    font-weight: bold;
+                }
+            }
+
+            .detail {
+                .flexbox(row, flex-start, flex-start);
+                width: 100%;
+                gap: 2vw;
+
+                .item {
+                    .flexbox(column, flex-start, flex-start);
+                    background: rgba(@white, .95);
+                    border-radius: 30px;
+                    box-sizing: border-box;
+                    cursor: pointer;
+                    padding: 30px;
+                    flex: 1;
+                    z-index: 2;
+
+                    .des {
+                        font-size: 1.6vw;
+                        color: rgb(@mainGreen);
+                    }
+
+                    .value {
+                        font-size: 5vw;
+                        font-weight: bold;
+                    }
+                }
+            }
+        }
+
+        #chicken_management {
+            width: calc(100vw - 40px);
+            margin: 20px auto;
+            padding-bottom: 50px;
+            box-sizing: border-box;
+
+            .title {
+                text-align: right;
+                font-weight: bold;
+                font-size: 48px;
+                color: rgba(@white, .7);
+            }
+
+            .main {
+                .flexbox(column, flex-start, flex-start);
+                gap: 30px;
+
+                .content {
+                    .flexbox(column, flex-start, flex-start);
+                    gap: 40px;
+                    width: 50%;
+                    margin: auto;
+                    padding: 50px 90px;
+                    border-radius: 20px;
+                    box-sizing: border-box;
+                    background: rgba(@white, .95);
+
+                    .item {
+                        .flexbox(row, flex-start, flex-start);
+                        border-bottom: 1px solid rgb(@mainGreen);
+                        padding-bottom: 10px;
+                        width: 100%;
+                        gap: 20px;
+
+                        .des {
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: rgb(@mainGreen);
+                            cursor: pointer;
+                        }
+
+                        input,
+                        select {
+                            flex: 1;
+                            background: unset;
+                            font-size: 24px;
+                            font-weight: bold;
+                            color: @fontColor;
+                            border: 0;
+                            outline: none;
+                            cursor: pointer;
+
+                            &:focus {
+                                cursor: default;
+                            }
+                        }
+
+                        fieldset {
+                            flex: 1;
+                            margin: 0 20px;
+                            padding: 0;
+                            border: 0;
+                            text-align: center;
+
+                            label {
+                                color: rgba(@mainGreen, .3);
+                                cursor: pointer;
+                                font-size: 24px;
+                            }
+
+                            .input {
+                                display: none;
+
+                                &:checked + label {
+                                    color: @fontColor;
+                                    font-weight: bold;
+                                }
+                            }
+                        }
+                    }
+
+                    .hide {
+                        display: none;
+                    }
+                }
+
+                .btn_group {
+                    .flexbox(row, flex-start, flex-start);
+                    gap: 40px;
+                    width: 50%;
+                    margin: auto;
+
+                    button {
+                        flex: 1;
+                        border: 1px solid rgb(@mainGreen);
+                        background: rgb(@white);
+                        color: rgb(@mainGreen);
+                        padding: 10px 0;
+                        border-radius: 10px;
+                        font-size: 24px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        z-index: 2;
+
+                        &:hover {
+                            color: rgb(@white);
+                            background: rgb(@mainGreen);
+                        }
+                    }
+
+                    button.cancel_btn {
+                        background: rgba(@white, .8);
+                        color: rgba(@mainGreen, .8);
+
+                        &:hover {
+                            color: rgb(@white);
+                            background: rgb(@mainGreen);
+                        }
+                    }
+                }
+            }
+        }
+
+        #hotpot_management {
+            #chicken_management;
+        }
+
+        #expense_management {
+            #chicken_management;
+        }
+
+        #report_management {
+            #chicken_management;
+        }
+
+        #system_management {
+            color: @white;
+
+            h1 {
+                text-align: center;
+            }
+
+            .content_core {
+                .flexbox(column, flex-start, flex-start);
+                width: 80%;
+                margin: auto;
+                color: #363636;
+
+                .nav {
+                    .flexbox(row, center, flex-start);
+                    background: rgba(255, 255, 255, 0.8);
+                    border-radius: 10px 10px 0 0;
+                    width: 50%;
+
+                    a {
+                        flex: 1;
+                        padding: 20px 0;
+                        text-align: center;
+                        color: #363636;
+                        font-weight: bold;
+                        .link-default;
+                    }
+
+                    .active {
+                        transform: scale(1.4);
+                        color: #8899dd;
+                    }
+                }
+
+                .content {
+                    background: rgba(255, 255, 255, 0.8);
+                    border-radius: 0 10px 10px;
+                    width: 100%;
+                    height: 75vh;
+                    box-sizing: border-box;
+                    padding: 24px;
+
+                    .items {
+                        height: 90%;
+                        overflow-y: auto;
+
+                        table {
+                            width: 100%;
+                            table-layout: fixed;
+                            border-collapse: collapse;
+
+                            thead,
+                            tbody {
+                                tr {
+                                    td {
+                                        padding: 10px 0;
+                                    }
+                                }
+                            }
+
+                            thead {
+                                tr {
+                                    background: rgba(115, 60, 244, 0.3);
+                                }
+                            }
+
+                            tbody {
+                                tr {
+                                    &:nth-child(even) {
+                                        background: rgba(115, 60, 244, 0.1);
+                                    }
+
+                                    td {
+                                        .btn_style {
+                                            background: transparent;
+                                            padding: 5px 10px;
+                                            cursor: pointer;
+                                        }
+
+                                        .edit {
+                                            color: #376996;
+                                            border: 1px solid #376996;
+                                        }
+
+                                        .delete {
+                                            color: #c06450;
+                                            border: 1px solid #c06450;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    .bottom {
+                        .flexbox(row, center, center);
+                        height: 10%;
+
+                        a {
+                            .link-default;
+                            color: #363636;
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+}
