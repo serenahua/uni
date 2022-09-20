@@ -1,1 +1,1 @@
-web: gunicorn uni.wsgi
+web: gunicorn --pythonpath uni uni.wsgi --log-file -
