@@ -6,11 +6,11 @@
   <div id="home_management">
       <div class="item">
           <div class="des">月盈餘總額</div>
-          <div class="value {% if total < 0 %}negative{% endif %}">{{ total|abs|intcomma }}</div>
+          <div class="value {% if total < 0 %}negative{% endif %}">{{ total|intcomma }}</div>
       </div>
       <div class="item">
           <div class="des">馥香雞</div>
-          <div class="value {% if chicken < 0 %}negative{% endif %}">{{ chicken|abs|intcomma }}</div>
+          <div class="value {% if chicken < 0 %}negative{% endif %}">{{ chicken|intcomma }}</div>
       </div>
       <div class="item">
           <div class="des">日料</div>
@@ -18,7 +18,7 @@
       </div>
       <div class="item">
           <div class="des">家庭</div>
-          <div class="value {% if expense > 0 %}negative{% endif %}">{{ expense|intcomma }}</div>
+          <div class="value {% if home < 0 %}negative{% endif %}">{{ home|abs|intcomma }}</div>
       </div>
       <div class="item">
           <div class="des">雞隻</div>

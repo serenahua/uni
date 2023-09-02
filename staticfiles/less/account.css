@@ -724,6 +724,12 @@ body #wrapper #chicken_management .main .btn_group .btn {
   border: none;
   cursor: pointer;
 }
+body #wrapper #chicken_management .main .btn_group .btn:hover {
+  opacity: 0.8;
+}
+body #wrapper #chicken_management .main .btn_group a:hover {
+  opacity: 0.8;
+}
 body #wrapper #hotpot_management {
   position: relative;
   width: 80%;
@@ -926,6 +932,12 @@ body #wrapper #hotpot_management .main .btn_group .btn {
   border: none;
   cursor: pointer;
 }
+body #wrapper #hotpot_management .main .btn_group .btn:hover {
+  opacity: 0.8;
+}
+body #wrapper #hotpot_management .main .btn_group a:hover {
+  opacity: 0.8;
+}
 body #wrapper #expense_management {
   position: relative;
   width: 80%;
@@ -1127,6 +1139,12 @@ body #wrapper #expense_management .main .btn_group .btn {
   background: none;
   border: none;
   cursor: pointer;
+}
+body #wrapper #expense_management .main .btn_group .btn:hover {
+  opacity: 0.8;
+}
+body #wrapper #expense_management .main .btn_group a:hover {
+  opacity: 0.8;
 }
 body #wrapper #report_management {
   position: relative;
@@ -1332,6 +1350,12 @@ body #wrapper #report_management .main .btn_group .btn {
   border: none;
   cursor: pointer;
 }
+body #wrapper #report_management .main .btn_group .btn:hover {
+  opacity: 0.8;
+}
+body #wrapper #report_management .main .btn_group a:hover {
+  opacity: 0.8;
+}
 body #wrapper #report_management .main .tabs {
   position: absolute;
   display: -webkit-flex;
@@ -1361,9 +1385,15 @@ body #wrapper #report_management .main .tabs {
 body #wrapper #report_management .main .tabs .item img {
   width: 60px;
 }
+body #wrapper #report_management .main .tabs .item:hover {
+  opacity: 0.9 !important;
+}
 body #wrapper #report_management .main .tabs .active img {
   opacity: 1 !important;
   filter: drop-shadow(0px 0px 12px rgba(0, 0, 0, 0.25));
+}
+body #wrapper #report_management .main .tabs .active:hover {
+  opacity: 1 !important;
 }
 body #wrapper #report_management .main .title {
   display: -webkit-flex;
@@ -1831,6 +1861,12 @@ body #wrapper #system_management .main .btn_group .btn {
   border: none;
   cursor: pointer;
 }
+body #wrapper #system_management .main .btn_group .btn:hover {
+  opacity: 0.8;
+}
+body #wrapper #system_management .main .btn_group a:hover {
+  opacity: 0.8;
+}
 body #wrapper #system_management .main .tabs {
   position: absolute;
   display: -webkit-flex;
@@ -1860,9 +1896,15 @@ body #wrapper #system_management .main .tabs {
 body #wrapper #system_management .main .tabs .item img {
   width: 60px;
 }
+body #wrapper #system_management .main .tabs .item:hover {
+  opacity: 0.9 !important;
+}
 body #wrapper #system_management .main .tabs .active img {
   opacity: 1 !important;
   filter: drop-shadow(0px 0px 12px rgba(0, 0, 0, 0.25));
+}
+body #wrapper #system_management .main .tabs .active:hover {
+  opacity: 1 !important;
 }
 body #wrapper #system_management .main .title {
   display: -webkit-flex;

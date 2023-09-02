@@ -20,28 +20,46 @@ class IndexView(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        color = Setting.objects.get(name="color")
         context['page'] = "home"
+
+        color = Setting.objects.get(name="color")
         context['color'] = color.value
+
         now = timezone.now()
 
-        chicken_incomes = Income.objects.filter(date__year=now.year, date__month=now.month, chicken=True)
-        hotpot_incomes = Income.objects.filter(date__year=now.year, date__month=now.month, hot_pot=True)
-        chicken_expenses = Expense.objects.filter(date__year=now.year, date__month=now.month,  item__chicken=True)
-        hotpot_expenses = Expense.objects.filter(date__year=now.year, date__month=now.month,  item__hot_pot=True)
-        home_expenses = Expense.objects.filter(date__year=now.year, date__month=now.month,  item__home=True)
+        # 用一個字典来儲存不同類別的收入和支出
+        categories = {
+            'chicken': {'income_filter': {'chicken': True}, 'expense_filter': {'item__chicken': True}},
+            'hotpot': {'income_filter': {'hot_pot': True}, 'expense_filter': {'item__hot_pot': True}},
+            'home': {'expense_filter': {'item__home': True}}
+        }
 
-        volume = sum([x.volume for x in chicken_incomes])
-        chicken = sum([x.value for x in chicken_incomes]) - sum([x.value for x in chicken_expenses])
-        hotpot = sum([x.value for x in hotpot_incomes]) - sum([x.value for x in hotpot_expenses])
-        expense = sum([x.value for x in home_expenses])
-        total = chicken + hotpot - expense
+        totals = {}
+        volume = 0
 
-        context['total'] = total
-        context['chicken'] = chicken
-        context['hotpot'] = hotpot
-        context['expense'] = expense
+        # 計算不同類別的收入和支出
+        for category, filters in categories.items():
+            income_filter = filters.get('income_filter', {})  # 获取 'income_filter' 键的值，如果不存在则返回空字典
+            expense_filter = filters.get('expense_filter', {})  # 获取 'expense_filter' 键的值，如果不存在则返回空字典
+
+            incomes = Income.objects.filter(date__year=now.year, date__month=now.month, **income_filter)
+            expenses = Expense.objects.filter(date__year=now.year, date__month=now.month, **expense_filter)
+
+            total_income = sum([income.value for income in incomes]) if category != 'home' else 0
+            total_expense = sum([expense.value for expense in expenses])
+            total = total_income - total_expense
+
+            totals[category] = total
+
+            if category == 'chicken':
+                volume = sum([income.volume for income in incomes])
+
+        # 計算總和
+        total = sum(totals.values())
+
+        context.update(totals)
         context['volume'] = volume
+        context['total'] = total
 
         return context
 
@@ -56,12 +74,11 @@ class ChickenView(LoginRequiredMixin, TemplateView):
         color = Setting.objects.get(name="color")
         context['color'] = color.value
 
-        if (item_id := self.request.GET.get('n')) is not None:
-            type = self.request.GET.get('t')
-            if type == 'income':
-                item = Income.objects.get(id=item_id)
-            elif type == 'expense':
-                item = Expense.objects.get(id=item_id)
+        item_id = self.request.GET.get('n')
+        type = self.request.GET.get('t')
+
+        if item_id is not None:
+            item = Income.objects.get(id=item_id) if type == 'income' else Expense.objects.get(id=item_id)
             context['type'] = type
             context['item'] = item
 
@@ -72,7 +89,7 @@ class ChickenView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, **kwargs):
         method = request.POST['method']
-        item_id = request.POST['id'] if method == 'edit' else None
+        item_id = request.POST.get('id')
         type = request.POST['type']
         date = request.POST['date']
         value = request.POST['value']
@@ -80,14 +97,10 @@ class ChickenView(LoginRequiredMixin, TemplateView):
         category = request.POST['category']
         remark = request.POST['remark']
 
-        if item_id and type == 'income':
-            item = Income.objects.get(id=item_id)
-        elif type == 'income':
-            item = Income()
-        elif item_id and type == 'expense':
-            item = Expense.objects.get(id=item_id)
-        elif type == 'expense':
-            item = Expense()
+        if method == 'edit':
+            item = Income.objects.get(id=item_id) if type == 'income' else Expense.objects.get(id=item_id)
+        else:
+            item = Income() if type == 'income' else Expense()
 
         item.date = date
         item.value = value
@@ -101,9 +114,7 @@ class ChickenView(LoginRequiredMixin, TemplateView):
 
         item.save()
 
-        return JsonResponse({
-            'status': True
-        })
+        return JsonResponse({'status': True})
 
 
 class HotPotView(LoginRequiredMixin, TemplateView):
@@ -116,12 +127,11 @@ class HotPotView(LoginRequiredMixin, TemplateView):
         color = Setting.objects.get(name="color")
         context['color'] = color.value
 
-        if (item_id := self.request.GET.get('n')) is not None:
-            type = self.request.GET.get('t')
-            if type == 'income':
-                item = Income.objects.get(id=item_id)
-            elif type == 'expense':
-                item = Expense.objects.get(id=item_id)
+        item_id = self.request.GET.get('n')
+        type = self.request.GET.get('t')
+
+        if item_id is not None:
+            item = Income.objects.get(id=item_id) if type == 'income' else Expense.objects.get(id=item_id)
             context['type'] = type
             context['item'] = item
 
@@ -132,21 +142,17 @@ class HotPotView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, **kwargs):
         method = request.POST['method']
-        item_id = request.POST['id'] if method == 'edit' else None
+        item_id = request.POST.get('id') if method == 'edit' else None
         type = request.POST.get('type')
         date = request.POST['date']
         value = request.POST['value']
-        category = request.POST['category']
+        category = request.POST.get('category')
         remark = request.POST['remark']
 
-        if item_id and type == 'income':
-            item = Income.objects.get(id=item_id)
-        elif type == 'income':
-            item = Income()
-        elif item_id and type == 'expense':
-            item = Expense.objects.get(id=item_id)
-        elif type == 'expense':
-            item = Expense()
+        if item_id:
+            item = Income.objects.get(id=item_id) if type == 'income' else Expense.objects.get(id=item_id)
+        else:
+            item = Income() if type == 'income' else Expense()
 
         item.date = date
         item.value = value
@@ -159,9 +165,7 @@ class HotPotView(LoginRequiredMixin, TemplateView):
 
         item.save()
 
-        return JsonResponse({
-            'status': True
-        })
+        return JsonResponse({'status': True})
 
 
 class HomeExpenseView(LoginRequiredMixin, TemplateView):
@@ -174,7 +178,9 @@ class HomeExpenseView(LoginRequiredMixin, TemplateView):
         color = Setting.objects.get(name="color")
         context['color'] = color.value
 
-        if (item_id := self.request.GET.get('n')) is not None:
+        item_id = self.request.GET.get('n')
+
+        if item_id is not None:
             item = Expense.objects.get(id=item_id)
             context['item'] = item
 
@@ -185,26 +191,20 @@ class HomeExpenseView(LoginRequiredMixin, TemplateView):
 
     def post(self, request, **kwargs):
         method = request.POST['method']
-        item_id = request.POST['id'] if method == 'edit' else None
+        item_id = request.POST.get('id') if method == 'edit' else None
         date = request.POST['date']
         value = request.POST['value']
         category = request.POST['category']
         remark = request.POST['remark']
 
-        if item_id:
-            item = Expense.objects.get(id=item_id)
-        else:
-            item = Expense()
-
+        item = Expense.objects.get(id=item_id) if item_id else Expense()
         item.date = date
         item.value = value
         item.item_id = category
         item.remark = remark
         item.save()
 
-        return JsonResponse({
-            'status': True
-        })
+        return JsonResponse({'status': True})
 
 
 class ReportView(LoginRequiredMixin, TemplateView):
@@ -219,7 +219,6 @@ class ReportView(LoginRequiredMixin, TemplateView):
         return context
 
     def get(self, request, **kwargs):
-
         context = self.get_context_data(**kwargs)
         now = timezone.now()
 
@@ -236,9 +235,9 @@ class ReportView(LoginRequiredMixin, TemplateView):
             expenses = Expense.objects.filter(date__year=year, date__month=month, item__isnull=False)
 
             # monthly data
-            monthly_volume = sum([x.volume for x in incomes])
-            monthly_income = sum([x.value for x in incomes])
-            monthly_expense = sum([x.value for x in expenses])
+            monthly_volume = incomes.aggregate(Sum('volume'))['volume__sum'] or 0
+            monthly_income = incomes.aggregate(Sum('value'))['value__sum'] or 0
+            monthly_expense = expenses.aggregate(Sum('value'))['value__sum'] or 0
             monthly_total = monthly_income - monthly_expense
 
             context['total'] = monthly_total
@@ -248,10 +247,12 @@ class ReportView(LoginRequiredMixin, TemplateView):
 
             # daily data
             daily_incomes = Income.objects.filter(date__year=year, date__month=month).\
-                            values(d=TruncDate('date')).\
+                            annotate(d=TruncDate('date')).\
+                            values('d').\
                             annotate(income=Sum('value'), chicken=Sum('volume'))
             daily_expenses = Expense.objects.filter(date__year=year, date__month=month, item__isnull=False).\
-                            values(d=TruncDate('date')).\
+                            annotate(d=TruncDate('date')).\
+                            values('d').\
                             annotate(expense=Sum('value'))
             lists = sorted(list(chain(daily_incomes, daily_expenses)), key=lambda item: item['d'], reverse=True)
             daily_list = lists.copy()
@@ -274,14 +275,14 @@ class ReportView(LoginRequiredMixin, TemplateView):
             current_date = datetime.strptime(date_string, "%Y-%m-%d")
             next_date = current_date + timedelta(1)
             incomes = Income.objects.filter(date__gte=current_date, date__lt=next_date)
-            expenses = Expense.objects.filter(date__gte=current_date, date__lt=next_date,item__isnull=False)
+            expenses = Expense.objects.filter(date__gte=current_date, date__lt=next_date, item__isnull=False)
             items = sorted(list(chain(incomes, expenses)), key=lambda i: i.creation, reverse=True)
 
             context['items'] = items
 
-            daily_volume = sum([x.volume for x in incomes])
-            daily_income = sum([x.value for x in incomes])
-            daily_expense = sum([x.value for x in expenses])
+            daily_volume = incomes.aggregate(Sum('volume'))['volume__sum'] or 0
+            daily_income = incomes.aggregate(Sum('value'))['value__sum'] or 0
+            daily_expense = expenses.aggregate(Sum('value'))['value__sum'] or 0
             daily_total = daily_income - daily_expense
 
             context['total'] = daily_total
@@ -294,7 +295,6 @@ class ReportView(LoginRequiredMixin, TemplateView):
         context['month'] = month
         context['day'] = day
 
-
         return self.render_to_response(context)
 
     def post(self, request, **kwargs):
@@ -304,10 +304,13 @@ class ReportView(LoginRequiredMixin, TemplateView):
         if method == 'delete_item':
             item_id = request.POST['id']
             type = request.POST['type']
-            if type == 'income':
-                Income.objects.get(id=item_id).delete()
-            elif type == 'expense':
-                Expense.objects.get(id=item_id).delete()
+            model_to_delete = Income if type == 'income' else Expense
+
+            try:
+                item_to_delete = model_to_delete.objects.get(id=item_id)
+                item_to_delete.delete()
+            except model_to_delete.DoesNotExist:
+                pass
 
         return JsonResponse({
             'status': True,
@@ -315,14 +318,12 @@ class ReportView(LoginRequiredMixin, TemplateView):
         })
 
     def get_valid_date(self, year, month, day, action):
-
         if action == 0:
             pass
         elif action == -1 or action == 1:
-            date_string = "%s-%s-%s" % (year, month, day)
-            _d = datetime.strptime(date_string, "%Y-%m-%d")
-            _d += timedelta(action)
-            year, month, day = _d.year, _d.month, _d.day
+            date = datetime(year, month, day)
+            date += timedelta(days=action)
+            year, month, day = date.year, date.month, date.day
         elif action == -30 or action == 30:
             if month == 1 and action < 0:
                 year -= 1
@@ -331,8 +332,7 @@ class ReportView(LoginRequiredMixin, TemplateView):
                 year += 1
                 month = 1
             else:
-                add = 1 if action > 0 else -1
-                month += add
+                month += 1 if action > 0 else -1
 
         return (year, month, day)
 
@@ -349,14 +349,14 @@ class SystemManagementView(TemplateView):
 
         cat = self.request.GET.get('cat', '1')
 
-        if cat == '1':
-            items = ExpenseItem.objects.filter(chicken=True).order_by('name')
-        elif cat == '2':
-            items = ExpenseItem.objects.filter(hot_pot=True).order_by('name')
-        elif cat == '3':
-            items = ExpenseItem.objects.filter(home=True).order_by('name')
-        elif cat == '4':
-            items = Setting.objects.all()
+        filters = {
+            '1': {'chicken': True},
+            '2': {'hot_pot': True},
+            '3': {'home': True},
+            '4': {}  # Empty filter for 'Setting' category
+        }
+
+        items = ExpenseItem.objects.filter(**filters.get(cat, {})).order_by('name')
 
         context['items'] = items
         context['cat'] = cat
@@ -375,60 +375,81 @@ class SystemDataView(TemplateView):
         context['color'] = color.value
 
         cat = self.request.GET.get('cat', '1')
-        if (item_id := self.request.GET.get('n')) is not None:
-            if cat == '4':
-                item = Setting.objects.get(id=item_id)
-            else:
-                item = ExpenseItem.objects.get(id=item_id)
-            context['item'] = item
+        item_id = self.request.GET.get('n')
 
+        item = None
+        if item_id is not None:
+            model_class = Setting if cat == '4' else ExpenseItem
+            item = model_class.objects.get(id=item_id)
+
+        context['item'] = item
         context['cat'] = cat
 
         return context
+
+    def _delete_item(self, request):
+        item_id = request.POST['id']
+        ExpenseItem.objects.get(id=item_id).delete()
+
+    def _create_item(self, request):
+        type = request.POST['type']
+        name = request.POST['name']
+
+        item = ExpenseItem()
+        item.name = name
+        item.chicken = (type == 'chicken')
+        item.hot_pot = (type == 'hotpot')
+        item.home = (type == 'home')
+        item.save()
+
+        type = 1 if type == 'chicken' else 2 if type == 'hotpot' else 3
+        return type
+
+    def _edit_item(self, request):
+        name = request.POST['name']
+        item_id = request.POST['id']
+
+        item = ExpenseItem.objects.get(id=item_id)
+        item.name = name
+        item.save()
+
+        type = 1 if item.chicken else 2 if item.hot_pot else 3
+        return type
+
+    def _edit_setting(self, request):
+        item_id = request.POST['id']
+        value = request.POST['name']
+
+        item = Setting.objects.get(id=item_id)
+        item.value = value
+        item.save()
+
+        return 4
+
+    def _edit_color(self, request):
+        item_id = request.POST['id']
+        value = str(request.POST['_color'])
+
+        item = Setting.objects.get(id=item_id)
+        item.value = value
+        item.save()
+
+        return 4
 
     def post(self, request, **kwargs):
         method = request.POST['method']
         type = 0
 
-        if method == 'delete_item':
-            item_id = request.POST['id']
-            ExpenseItem.objects.get(id=item_id).delete()
-        elif method == 'create_item':
-            type = request.POST['type']
-            name = request.POST['name']
-            item = ExpenseItem()
+        method_functions = {
+            'delete_item': self._delete_item,
+            'create_item': self._create_item,
+            'edit_item': self._edit_item,
+            'edit_setting': self._edit_setting,
+            'edit_color': self._edit_color,
+        }
 
-            item.name = name
-            item.chicken = (type == 'chicken')
-            item.hot_pot = (type == 'hotpot')
-            item.home = (type == 'home')
-            item.save()
-
-            type = 1 if type == 'chicken' else 2 if type == 'hotpot' else 3
-        elif method == 'edit_item':
-            name = request.POST['name']
-            item_id = request.POST['id']
-            item = ExpenseItem.objects.get(id=item_id)
-
-            item.name = name
-            item.save()
-            type = 1 if item.chicken else 2 if item.hot_pot else 3
-        elif method == 'edit_setting':
-            item_id = request.POST['id']
-            value = request.POST['name']
-            item = Setting.objects.get(id=item_id)
-            type = 4
-
-            item.value = value
-            item.save()
-        elif method == 'edit_color':
-            item_id = request.POST['id']
-            value = str(request.POST['_color'])
-            item = Setting.objects.get(id=item_id)
-            type = 4
-
-            item.value = value
-            item.save()
+        if method in method_functions:
+            type = method_functions[method](request)
 
         return JsonResponse({
             'status': True,
@@ -442,8 +463,9 @@ class LoginView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         name = Setting.objects.get(name='name')
-        color = Setting.objects.get(name="color")
         context['name'] = name
+
+        color = Setting.objects.get(name="color")
         context['color'] = color.value
 
         return context
@@ -454,6 +476,7 @@ class LoginView(TemplateView):
 
         context = self.get_context_data(**kwargs)
         context['next'] = request.GET.get('next', '/')
+
         return self.render_to_response(context)
 
     def post(self, request, **kwargs):
@@ -473,15 +496,14 @@ class LoginView(TemplateView):
 
         if user is not None:
             login(request, user)
+            return JsonResponse({
+                'status': True,
+                'next': _next,
+            })
         else:
             return JsonResponse({
                 'status': False,
                 'error': -2,
                 'msg': 'account/password not provided'
             })
-
-        return JsonResponse({
-            'status': True,
-            'next': _next,
-        })
 
